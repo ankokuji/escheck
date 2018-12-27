@@ -8,13 +8,17 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
-    "check": "es-check ecma5 './index.js'"
+    "check": "es-check ecma5 './index.js'",
+    "start": "ts-node src/index.ts"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.18",
     "acorn": "^6.0.4",
     "acorn-walk": "^6.1.1",
     "esprima": "^4.0.1",
-    "is-es-version": "^1.0.0"
+    "is-es-version": "^1.0.0",
+    "lodash": "^4.17.11",
+    "log4js": "^3.0.6"
   }
 }

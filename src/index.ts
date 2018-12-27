@@ -1,43 +1,33 @@
-/// <reference path="../types.d.ts" />
-
-import * as acorn from "acorn";
-import * as walk from "acorn-walk";
+import { checkES5Errors, printError } from "./check";
 import fs from "fs";
+import path from "path";
 
-enum NodeType {
-  Identifier = "Identifier",
-
+/**
+ * 读取文件
+ *
+ * @param {string} filePath
+ * @returns {Promise<string>}
+ */
+async function readFile(filePath: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path.posix.join(__dirname, filePath), (err, data) => {
+      if(err) {
+        reject(err);
+      }
+      resolve(data.toString());
+    })
+  })
 }
 
-interface IdentifierNode extends acorn.Node {
-  name: string;
+/**
+ * 主函数
+ *
+ */
+async function main() {
+  const jscode = await readFile("../template/example.js");
+  const errs = checkES5Errors(jscode);
+  printError(jscode, errs);
+  debugger
 }
 
-const filtList = {
-  merberExpression: [
-    {object: "Symbol", property: "iterator"}
-  ]
-}
-
-walk.simple(acorn.parse("console.log(Symbol.iterator) \n Object.assign({}, {})"), {
-  Literal(node: any) {
-    console.log(`Found a literal: ${node.value}`);
-  },
-  MemberExpression(node: acorn.Node) {
-    debugger
-    handleMemberExpression(node);
-  }
-});
-
-function handleMemberExpression(node: acorn.Node) {
-
-
-}
-
-function isIdentifier(node: acorn.Node) {
-  return node.type == NodeType.Identifier;
-}
-
-function isSpecificIdentifier(node: IdentifierNode, name: string) {
-  return isIdentifier(node) && node.name === name;
-}
+main()
