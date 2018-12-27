@@ -1,0 +1,20 @@
+{
+  "name": "escheck",
+  "version": "0.1.0",
+  "author": "huguang",
+  "devDependencies": {
+    "es-check": "^5.0.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  },
+  "scripts": {
+    "check": "es-check ecma5 './index.js'"
+  },
+  "dependencies": {
+    "@types/node": "^10.12.18",
+    "acorn": "^6.0.4",
+    "acorn-walk": "^6.1.1",
+    "esprima": "^4.0.1",
+    "is-es-version": "^1.0.0"
+  }
+}
