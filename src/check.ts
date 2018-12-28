@@ -125,11 +125,17 @@ function parseASTNodeInfo2Error(
 ): NodeError {
   const { node, ancesters } = nodeInfo;
 
-  const fragment = parseErrorFragment(ancesters, code);
+  // const fragment = parseErrorFragment(ancesters, code);
+  const fragment = parseErrorFragmentByLine(node, code);
   const errorWord = range2String(node, code);
   const nodeLocation = parseNodeLocation(node, code);
 
-  return { fragmentLocation: fragment.location as NodeLocation, errorSentence: fragment.code, errorWord, nodeLocation };
+  return {
+    fragmentLocation: fragment.location,
+    errorSentence: fragment.code,
+    errorWord,
+    nodeLocation
+  };
 }
 
 /**
@@ -141,6 +147,87 @@ function parseASTNodeInfo2Error(
  */
 function parseNodeLocation(node: acorn.Node, code: string): NodeLocation {
   return parseRangeLocation(node, code);
+}
+
+/**
+ * 从行数上获取代码片段
+ *
+ * @param {acorn.Node} node
+ * @param {string} code
+ */
+function parseErrorFragmentByLine(
+  node: acorn.Node,
+  code: string
+): { location: NodeLocation; code: string } {
+  const FRAGMENT_LINE_OFFSET = 3;
+  const location = parseNodeLocation(node, code);
+  const codeSplitList = _.split("\n")(code);
+  const { start: fragmentStartLine, end: fragmentEndLine } = rangeByOffset(
+    location.row,
+    FRAGMENT_LINE_OFFSET,
+    codeSplitList.length
+  );
+  const fragmentCode = _.compose(
+    _.join("\n"),
+    trimFragmentLines,
+    _.slice(fragmentStartLine)(fragmentEndLine)
+  )(codeSplitList);
+  return {
+    location: {
+      row: fragmentStartLine,
+      col: 0
+    },
+    code: fragmentCode
+  };
+}
+
+/**
+ * 获取索引正负一定偏移量的范围，值在0-limit之间
+ *
+ * @param {number} index
+ * @param {number} offset
+ * @param {number} limit
+ * @returns
+ */
+function rangeByOffset(index: number, offset: number, limit: number) {
+  return {
+    start: Math.max(0, index - offset),
+    end: Math.min(limit, index + offset)
+  };
+}
+
+/**
+ * 去掉代码片段头部共同的空格
+ *
+ * @param {string[]} lines
+ * @returns
+ */
+function trimFragmentLines(lines: string[]) {
+  const minHeadSpaceNum = _.compose<any, any>(
+    _.min,
+    _.map(calculateHeadSpace)
+  )(lines);
+  const res = _.compose(
+    _.map(_.join("")),
+    _.map(_.drop(minHeadSpaceNum))
+  )(lines);
+  return res;
+}
+
+/**
+ * 获取字符串头部空格数量
+ *
+ * @param {string} line
+ * @returns
+ */
+function calculateHeadSpace(line: string) {
+  let num = 0;
+  let char = line[num];
+  while (num < line.length && char === " ") {
+    num++;
+    char = line[num];
+  }
+  return num;
 }
 
 /**
@@ -282,14 +369,14 @@ export function printError(errList: NodeError[]): void {
    * @returns
    */
   function formatLogString(error: NodeError): string {
-    const { nodeLocation, errorWord, errorSentence } = error;
+    const { nodeLocation, errorWord, errorSentence, fragmentLocation } = error;
     const errorTitle = chalk.redBright(
       `code:${nodeLocation.row}:${
         nodeLocation.col
       } - error Find invalid api invoke '${errorWord}'. \n\n`
     );
-    const errorBody = chalk.whiteBright(
-      `${addLineNum(nodeLocation.row, errorSentence)} \n\n`
+    const errorBody = chalk.white(
+      `${addLineNum(fragmentLocation.row + 1, errorSentence)} \n\n`
     );
     return `${errorTitle}${errorBody}`;
   }
@@ -303,16 +390,28 @@ export function printError(errList: NodeError[]): void {
 }
 
 /**
- * 在代码中增加行号
+ * insert line number into code.
  *
  * @param {number} linestart
  * @param {string} code
  */
 function addLineNum(linestart: number, code: string) {
+  /**
+   * construct line number to code string.
+   *
+   * @param {number} num
+   * @param {string} str
+   * @returns {string}
+   */
   function constructLineNum(num: number, str: string): string {
     return num + "  " + str;
   }
-
+  /**
+   * construct line number to each row
+   *
+   * @param {*} [num, str]
+   * @returns
+   */
   const constructLineNumByRow = ([num, str]: any) => {
     return constructLineNum(num, str);
   };
