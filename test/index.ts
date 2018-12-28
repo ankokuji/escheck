@@ -67,7 +67,8 @@ async function main() {
   const checkList = combineCheckList([arrayRule, symbolRule]);
   const jscode = await readFile("../template/example.js");
   const errs = checkES5Errors(jscode, checkList);
-  // printError(jscode, errs);
+  const print = printError(errs);
+  console.log(print)
   debugger;
 }
 

@@ -5,6 +5,7 @@ import * as walk from "acorn-walk";
 import log from "./log";
 import _ from "lodash/fp";
 import { isIdentifier, isCallExpression, isMemberExpression } from "./nameType";
+import chalk from "chalk";
 
 /**
  * 描述代码位置
@@ -69,8 +70,8 @@ export function checkES5Errors(
   code: string,
   checkList: CheckList
 ): NodeError[] {
-  if(!checkList || !_.isObject(checkList)) {
-    throw new Error("[escheck] check list should be an object!!")
+  if (!checkList || !_.isObject(checkList)) {
+    throw new Error("[escheck] check list should be an object!!");
   }
   const errorList: ASTNodeInfo[] = generateNodeErrorList(code, checkList);
   return _.map(_.curryRight(parseASTNodeInfo2Error)(code))(errorList);
@@ -124,11 +125,11 @@ function parseASTNodeInfo2Error(
 ): NodeError {
   const { node, ancesters } = nodeInfo;
 
-  const errorSentence = parseErrorSentence(ancesters, code);
+  const fragment = parseErrorFragment(ancesters, code);
   const errorWord = range2String(node, code);
   const nodeLocation = parseNodeLocation(node, code);
 
-  return { errorSentence, errorWord, nodeLocation };
+  return { fragmentLocation: fragment.location as NodeLocation, errorSentence: fragment.code, errorWord, nodeLocation };
 }
 
 /**
@@ -149,20 +150,26 @@ function parseNodeLocation(node: acorn.Node, code: string): NodeLocation {
  * @param {string} code
  * @returns
  */
-function parseErrorSentence(ancesters: acorn.Node[], code: string) {
+function parseErrorFragment(
+  ancesters: acorn.Node[],
+  code: string
+): { location: NodeLocation | undefined; code: string } {
   const PRINT_LEVEL = 5;
-  let errorSentence;
+  let fragment;
   const printTargetNode = _.compose<any, any>(
     _.first,
     _.takeLast(PRINT_LEVEL)
   )(ancesters);
   if (printTargetNode) {
     const { start, end } = printTargetNode;
-    errorSentence = range2String({ start, end }, code);
+    fragment = {
+      location: parseNodeLocation(printTargetNode, code),
+      code: range2String({ start, end }, code)
+    };
   } else {
-    errorSentence = "can't get error sentence!!!";
+    fragment = { location: undefined, code: "can't get error sentence!!!" };
   }
-  return errorSentence;
+  return fragment;
 }
 
 /**
@@ -175,7 +182,10 @@ function extractErrorMemberExpression(
   ancesters: acorn.Node[],
   checkList: CheckList
 ): ASTNodeInfo | undefined {
-  if (isMemberExpressionNodeInFiltList(node, checkList) && isTargetExpressionBeExec(ancesters)) {
+  if (
+    isMemberExpressionNodeInFiltList(node, checkList) &&
+    isTargetExpressionBeExec(ancesters)
+  ) {
     return { node: node, ancesters: ancesters };
   }
   return undefined;
@@ -229,7 +239,10 @@ function isNodePropertyOfExpression(ancesters: acorn.Node[]): boolean {
  * @param {MemberExpression} node
  * @returns {boolean}
  */
-function isMemberExpressionNodeInFiltList(node: MemberExpression, filtList: CheckList): boolean {
+function isMemberExpressionNodeInFiltList(
+  node: MemberExpression,
+  filtList: CheckList
+): boolean {
   const parsed = parseMermberExpression(node);
   const filteredList = (_.find as any)(parsed)(filtList.memberExpression);
   return !!filteredList;
@@ -257,15 +270,60 @@ function parseMermberExpression(
  * @param {string} code
  * @param {Range[]} errList
  */
-export function printError(code: string, errList: Range[]): void {
+export function printError(errList: NodeError[]): void {
   function print(str: string) {
     log.info(str);
   }
+
+  /**
+   * 根据错误详情，获取打印错误信息.
+   *
+   * @param {NodeError} error
+   * @returns
+   */
+  function formatLogString(error: NodeError): string {
+    const { nodeLocation, errorWord, errorSentence } = error;
+    const errorTitle = chalk.redBright(
+      `code:${nodeLocation.row}:${
+        nodeLocation.col
+      } - error Find invalid api invoke '${errorWord}'. \n\n`
+    );
+    const errorBody = chalk.whiteBright(
+      `${addLineNum(nodeLocation.row, errorSentence)} \n\n`
+    );
+    return `${errorTitle}${errorBody}`;
+  }
+
   // no returns
-  _.compose<any, any>(
-    _.forEach(print),
-    _.map(_.curryRight(range2String)(code))
+  return _.compose<any, any>(
+    _.join(""),
+    // _.forEach(print),
+    _.map(formatLogString)
   )(errList);
+}
+
+/**
+ * 在代码中增加行号
+ *
+ * @param {number} linestart
+ * @param {string} code
+ */
+function addLineNum(linestart: number, code: string) {
+  function constructLineNum(num: number, str: string): string {
+    return num + "  " + str;
+  }
+
+  const constructLineNumByRow = ([num, str]: any) => {
+    return constructLineNum(num, str);
+  };
+  const codeSplitArr = _.split("\n")(code);
+  const indexArr = _.range(linestart)(linestart + codeSplitArr.length);
+  const str = _.compose<any, any>(
+    _.join("\n"),
+    _.map(constructLineNumByRow)
+  )(_.zip<number, any>(indexArr, codeSplitArr));
+
+  return str;
 }
 
 /**

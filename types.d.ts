@@ -15,6 +15,13 @@ interface NodeError {
    */
   nodeLocation: NodeLocation;
   /**
+   * 片段位置
+   *
+   * @type {NodeLocation}
+   * @memberof NodeError
+   */
+  fragmentLocation: NodeLocation;
+  /**
    * 错误所在语句
    *
    * @type {string}

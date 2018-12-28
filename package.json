@@ -12,6 +12,7 @@
     "check": "es-check ecma5 './index.js'",
     "dev": "ts-node src/index.ts",
     "compile": "tsc",
+    "test": "ts-node test/index.ts",
     "start": "node dist/src/index.js"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@types/node": "^10.12.18",
     "acorn": "^6.0.4",
     "acorn-walk": "^6.1.1",
+    "chalk": "^2.4.1",
     "lodash": "^4.17.11",
     "log4js": "^3.0.6"
   }
