@@ -2,6 +2,7 @@
   "name": "escheck",
   "version": "0.1.0",
   "author": "huguang",
+  "main": "dist/src/index.js",
   "devDependencies": {
     "es-check": "^5.0.0",
     "ts-node": "^7.0.1",
@@ -9,15 +10,15 @@
   },
   "scripts": {
     "check": "es-check ecma5 './index.js'",
-    "start": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "compile": "tsc",
+    "start": "node dist/src/index.js"
   },
   "dependencies": {
     "@types/lodash": "^4.14.119",
     "@types/node": "^10.12.18",
     "acorn": "^6.0.4",
     "acorn-walk": "^6.1.1",
-    "esprima": "^4.0.1",
-    "is-es-version": "^1.0.0",
     "lodash": "^4.17.11",
     "log4js": "^3.0.6"
   }

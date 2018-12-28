@@ -1,0 +1,6 @@
+{
+  "memberExpression": [{
+    "object": "Array",
+    "property": "from"
+  }]
+}

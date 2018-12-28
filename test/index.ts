@@ -1,10 +1,27 @@
-import { checkES5Errors } from "./check";
+import { checkES5Errors, printError } from "../src/check";
 import fs from "fs";
 import path from "path";
 import _ from "lodash/fp";
 
 import arrayRule from "../rules/Array.json";
 import symbolRule from "../rules/Symbol.json";
+
+/**
+ * 读取文件
+ *
+ * @param {string} filePath
+ * @returns {Promise<string>}
+ */
+async function readFile(filePath: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path.posix.join(__dirname, filePath), (err, data) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(data.toString());
+    });
+  });
+}
 
 /**
  * 合并检测规则。
@@ -43,22 +60,15 @@ function combineCheckList(checkRuleArray: any[]) {
 }
 
 /**
- * 对代码进行检查，同时提供自定义配置.
+ * 主函数
  *
- * @export
- * @param {string} code
- * @param {*} [customCheckList]
- * @returns {NodeError[]}
  */
-export function esCheck(code: string, customCheckList?: any): NodeError[] {
-  let checkList;
-  if (customCheckList && _.isObject(customCheckList)) {
-    checkList = combineCheckList([arrayRule, symbolRule, customCheckList]);
-  } else {
-    checkList = combineCheckList([arrayRule, symbolRule]);
-  }
-  const errs = checkES5Errors(code, checkList);
-  return errs;
+async function main() {
+  const checkList = combineCheckList([arrayRule, symbolRule]);
+  const jscode = await readFile("../template/example.js");
+  const errs = checkES5Errors(jscode, checkList);
+  // printError(jscode, errs);
+  debugger;
 }
 
-export { printError } from "./check";
+main();
