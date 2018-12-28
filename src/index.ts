@@ -1,4 +1,4 @@
-import { checkES5Errors } from "./check";
+import { checkErrors } from "./check";
 import _ from "lodash/fp";
 
 import arrayRule from "../rules/Array.json";
@@ -55,7 +55,7 @@ export function esCheck(code: string, customCheckList?: any): NodeError[] {
   } else {
     checkList = combineCheckList([arrayRule, symbolRule]);
   }
-  const errs = checkES5Errors(code, checkList);
+  const errs = checkErrors(code, checkList);
   return errs;
 }
 

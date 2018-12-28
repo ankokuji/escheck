@@ -8,12 +8,24 @@ import { isIdentifier, isCallExpression, isMemberExpression } from "./nameType";
 import chalk from "chalk";
 
 /**
- * 描述代码位置
+ * Illustrate start and end of a node.
  *
  * @interface Range
  */
 interface Range {
+  /**
+   * Start of range.
+   *
+   * @type {number}
+   * @memberof Range
+   */
   start: number;
+  /**
+   * End of range.
+   *
+   * @type {number}
+   * @memberof Range
+   */
   end: number;
 }
 
@@ -25,12 +37,24 @@ type CheckList = any;
  * @interface ASTNodeInfo
  */
 interface ASTNodeInfo {
+  /**
+   * AST node of target token.
+   *
+   * @type {acorn.Node}
+   * @memberof ASTNodeInfo
+   */
   node: acorn.Node;
+  /**
+   * Nodes list of walk path.
+   *
+   * @type {acorn.Node[]}
+   * @memberof ASTNodeInfo
+   */
   ancesters: acorn.Node[];
 }
 
 /**
- *
+ * Definition of identifier node.
  *
  * @interface IdentifierNode
  * @extends {acorn.Node}
@@ -40,7 +64,7 @@ interface IdentifierNode extends acorn.Node {
 }
 
 /**
- *
+ * Definition of member expression node.
  *
  * @interface MemberExpression
  * @extends {acorn.Node}
@@ -51,22 +75,22 @@ interface MemberExpression extends acorn.Node {
 }
 
 /**
- * 解析完的对象
+ * Parsed member expression
  *
  * @interface ParsedMerberExpression
  */
-interface ParsedMerberExpression {
+interface ParsedMemberExpression {
   object: string;
   property: string;
 }
 
 /**
- * 获取代码的es5错误
+ * Check invalid api invoke errors.
  *
  * @param {string} code
  * @returns {ASTNodeInfo[]}
  */
-export function checkES5Errors(
+export function checkErrors(
   code: string,
   checkList: CheckList
 ): NodeError[] {
@@ -203,7 +227,7 @@ function rangeByOffset(index: number, offset: number, limit: number) {
  * @param {string[]} lines
  * @returns
  */
-function trimFragmentLines(lines: string[]) {
+function trimFragmentLines(lines: string[]): string[] {
   const minHeadSpaceNum = _.compose<any, any>(
     _.min,
     _.map(calculateHeadSpace)
@@ -221,7 +245,7 @@ function trimFragmentLines(lines: string[]) {
  * @param {string} line
  * @returns
  */
-function calculateHeadSpace(line: string) {
+function calculateHeadSpace(line: string): number {
   let num = 0;
   let char = line[num];
   while (num < line.length && char === " ") {
@@ -340,11 +364,11 @@ function isMemberExpressionNodeInFiltList(
  * Parse a member expression(extract name of identifier).
  *
  * @param {MemberExpression} node
- * @returns {ParsedMerberExpression}
+ * @returns {ParsedMemberExpression}
  */
 function parseMermberExpression(
   node: MemberExpression
-): ParsedMerberExpression {
+): ParsedMemberExpression {
   const { object, property } = node;
   return {
     object: object.name,
@@ -358,7 +382,7 @@ function parseMermberExpression(
  * @param {NodeError[]} errList
  * @returns {string} 
  */
-export function printError(errList: NodeError[]): void {
+export function printError(errList: NodeError[]): string {
   function print(str: string) {
     log.info(str);
   }
@@ -432,7 +456,7 @@ function addLineNum(linestart: number, code: string) {
  * @param {Range} range
  * @returns
  */
-function range2String(range: Range, code: string) {
+function range2String(range: Range, code: string): string {
   const PRINT_RANGE = 0;
   const { start, end } = range;
   const trueStart = Math.max(0, start - PRINT_RANGE);

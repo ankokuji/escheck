@@ -1,4 +1,4 @@
-import { checkES5Errors, printError } from "../src/check";
+import { checkErrors, printError } from "../src/check";
 import fs from "fs";
 import path from "path";
 import _ from "lodash/fp";
@@ -66,7 +66,7 @@ function combineCheckList(checkRuleArray: any[]) {
 async function main() {
   const checkList = combineCheckList([arrayRule, symbolRule]);
   const jscode = await readFile("../template/example.js");
-  const errs = checkES5Errors(jscode, checkList);
+  const errs = checkErrors(jscode, checkList);
   const print = printError(errs);
   console.log(print)
   debugger;
