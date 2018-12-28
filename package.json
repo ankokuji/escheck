@@ -1,6 +1,6 @@
 {
-  "name": "escheck",
-  "version": "0.1.0",
+  "name": "es-api-check",
+  "version": "0.1.2",
   "author": "huguang",
   "main": "dist/src/index.js",
   "devDependencies": {

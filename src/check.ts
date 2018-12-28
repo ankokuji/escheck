@@ -174,7 +174,7 @@ function extractErrorMemberExpression(
   node: MemberExpression,
   ancesters: acorn.Node[],
   checkList: CheckList
-): any | undefined {
+): ASTNodeInfo | undefined {
   if (isMemberExpressionNodeInFiltList(node, checkList) && isTargetExpressionBeExec(ancesters)) {
     return { node: node, ancesters: ancesters };
   }

@@ -1,6 +1,4 @@
 import { checkES5Errors } from "./check";
-import fs from "fs";
-import path from "path";
 import _ from "lodash/fp";
 
 import arrayRule from "../rules/Array.json";
