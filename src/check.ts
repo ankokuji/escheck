@@ -20,7 +20,7 @@ interface Range {
 type CheckList = any;
 
 /**
- *
+ * 
  *
  * @interface ASTNodeInfo
  */
@@ -113,7 +113,7 @@ function generateNodeErrorList(code: string, checkList: any) {
 }
 
 /**
- * 解析AST node 信息为错误信息
+ * Parse AST node info into error detail.
  *
  * @param {ASTNodeInfo} nodeInfo
  * @param {string} code
@@ -139,7 +139,7 @@ function parseASTNodeInfo2Error(
 }
 
 /**
- * 解析ast节点位置
+ * parse node's location(row and column).
  *
  * @param {acorn.Node} node
  * @param {string} code
@@ -150,7 +150,7 @@ function parseNodeLocation(node: acorn.Node, code: string): NodeLocation {
 }
 
 /**
- * 从行数上获取代码片段
+ * Get code fragment around target node by line offset.
  *
  * @param {acorn.Node} node
  * @param {string} code
@@ -182,7 +182,7 @@ function parseErrorFragmentByLine(
 }
 
 /**
- * 获取索引正负一定偏移量的范围，值在0-limit之间
+ * Get a range which offsets by index, and ranges from 0 to limit.
  *
  * @param {number} index
  * @param {number} offset
@@ -197,7 +197,8 @@ function rangeByOffset(index: number, offset: number, limit: number) {
 }
 
 /**
- * 去掉代码片段头部共同的空格
+ * Trim spaces ahead of each line of code.
+ * Based on minimum space number of all lines.
  *
  * @param {string[]} lines
  * @returns
@@ -215,7 +216,7 @@ function trimFragmentLines(lines: string[]) {
 }
 
 /**
- * 获取字符串头部空格数量
+ * calculate number of space ahead of string.
  *
  * @param {string} line
  * @returns
@@ -336,7 +337,7 @@ function isMemberExpressionNodeInFiltList(
 }
 
 /**
- * 解析表达式
+ * Parse a member expression(extract name of identifier).
  *
  * @param {MemberExpression} node
  * @returns {ParsedMerberExpression}
@@ -352,10 +353,10 @@ function parseMermberExpression(
 }
 
 /**
- * 打印错误
+ * Print error list to string.
  *
- * @param {string} code
- * @param {Range[]} errList
+ * @param {NodeError[]} errList
+ * @returns {string} 
  */
 export function printError(errList: NodeError[]): void {
   function print(str: string) {
@@ -363,10 +364,10 @@ export function printError(errList: NodeError[]): void {
   }
 
   /**
-   * 根据错误详情，获取打印错误信息.
+   * Generate error detail string from structured error data.
    *
    * @param {NodeError} error
-   * @returns
+   * @returns {string} 
    */
   function formatLogString(error: NodeError): string {
     const { nodeLocation, errorWord, errorSentence, fragmentLocation } = error;
@@ -426,7 +427,7 @@ function addLineNum(linestart: number, code: string) {
 }
 
 /**
- * 根据位置截取字符串
+ * Slice code snippet from source code by range.
  *
  * @param {Range} range
  * @returns
@@ -440,7 +441,7 @@ function range2String(range: Range, code: string) {
 }
 
 /**
- * 解析范围在代码的行列位置
+ * Parse the location of a node's start position.
  *
  * @param {Range} range
  * @param {string} code
