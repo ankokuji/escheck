@@ -17,6 +17,7 @@ async function readFile(filePath: string): Promise<any> {
     fs.readFile(path.posix.join(__dirname, filePath), (err, data) => {
       if (err) {
         reject(err);
+        return;
       }
       resolve(data.toString());
     });
@@ -65,8 +66,9 @@ function combineCheckList(checkRuleArray: any[]) {
  */
 async function main() {
   const checkList = combineCheckList([arrayRule, symbolRule]);
-  const jscode = await readFile("../template/example.js");
-  const errs = checkErrors(jscode, checkList);
+  // const jscode = await readFile("../template/example.js");
+  const jscode = `dsjklg =sdhjwl function t2`;
+  const errs = checkErrors(undefined as any, checkList);
   const print = printError(errs);
   console.log(print)
   debugger;

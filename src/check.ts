@@ -95,14 +95,17 @@ export function checkErrors(
   checkList: CheckList
 ): NodeError[] {
   if (!checkList || !_.isObject(checkList)) {
-    throw new Error("[escheck] check list should be an object!!");
+    throw new Error("[es-api-check] parameter `checklist` should be an object.");
+  }
+  if (!code || !_.isString(code)) {
+    throw new Error("[es-api-check] parameter `code` should be a string.")
   }
   const errorList: ASTNodeInfo[] = generateNodeErrorList(code, checkList);
   return _.map(_.curryRight(parseASTNodeInfo2Error)(code))(errorList);
 }
 
 /**
- * 生成ast，并遍历生成错误列表
+ * Generate AST from js code, then walk through AST to generate error list.
  *
  * @param {string} code
  * @returns
@@ -191,7 +194,7 @@ function parseErrorFragmentByLine(
     FRAGMENT_LINE_OFFSET,
     codeSplitList.length
   );
-  const fragmentCode = _.compose(
+  const fragmentCode = _.compose<any, any, any>(
     _.join("\n"),
     trimFragmentLines,
     _.slice(fragmentStartLine)(fragmentEndLine)
@@ -285,7 +288,7 @@ function parseErrorFragment(
 }
 
 /**
- * 处理 merber expression
+ * handle merber expression
  *
  * @param {MemberExpression} node
  */
@@ -304,7 +307,9 @@ function extractErrorMemberExpression(
 }
 
 /**
- * 判断表达式是否是执行对，有时是通过`===`判断环境时调用，不会引起报错
+ * determine if an expression is invoked,
+ * sometimes expression is used in an `===` to inspect js enviroment,
+ * which will not lead to an error.
  *
  * @param {acorn.Node[]} ancesters
  * @returns {boolean}
@@ -331,7 +336,7 @@ function isNodeCallExpressionLeft(ancesters: acorn.Node[]): boolean {
 }
 
 /**
- * 判断是否处于表达式的property，如 `a[Symbol.iterator]`
+ * determine if target node is property of expression, e.t. `a[Symbol.iterator]`.
  *
  * @param {acorn.Node[]} ancesters
  * @returns
@@ -346,7 +351,7 @@ function isNodePropertyOfExpression(ancesters: acorn.Node[]): boolean {
 }
 
 /**
- * 判断此member expression节点是否在过滤列表中
+ * determine if node is in member expression check list.
  *
  * @param {MemberExpression} node
  * @returns {boolean}
