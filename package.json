@@ -1,6 +1,7 @@
 {
   "name": "es-api-check",
-  "version": "0.1.2",
+  "description": "Check if js files contains unsupport api useage.",
+  "version": "0.1.4",
   "author": "huguang",
   "main": "dist/src/index.js",
   "devDependencies": {

@@ -9,7 +9,7 @@ yarn add es-api-check
 ```
 
 # Usage
-目前 提供两个 api ，分别是检查错误，和打印错误。
+目前提供两个 api ，分别是检查错误，和打印错误。
 ```javascript
 import {esCheck, printError} from "es-api-check";
 

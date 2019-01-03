@@ -1,9 +1,5 @@
-class Type {
-
-}
-
 /**
- * AST node type 枚举
+ * AST node type enumaration
  *
  * @enum {number}
  */
@@ -14,25 +10,32 @@ enum NodeType {
 }
 
 /**
- * 判断node是否identifier
+ * Determine if node is an identifier.
  *
  * @param {acorn.Node} node
  * @returns
  */
-export function isIdentifier(node: acorn.Node) {
+export function isIdentifier(node: acorn.Node): node is Identifier {
   return node.type == NodeType.Identifier;
 }
 
 /**
- * 判断node 是否 member expression
+ * Determine if node is a member expression.
  *
  * @param {acorn.Node} node
  * @returns
  */
-export function isMemberExpression(node: acorn.Node) {
+export function isMemberExpression(node: acorn.Node): node is MemberExpression  {
   return node.type == NodeType.MemberExpression;
 }
 
-export function isCallExpression(node: acorn.Node) {
+/**
+ * Determine if node is a call expression.
+ *
+ * @export
+ * @param {acorn.Node} node
+ * @returns {node is CallExpression}
+ */
+export function isCallExpression(node: acorn.Node): node is CallExpression {
   return node.type === NodeType.CallExpression;
 }

@@ -54,27 +54,6 @@ interface ASTNodeInfo {
 }
 
 /**
- * Definition of identifier node.
- *
- * @interface IdentifierNode
- * @extends {acorn.Node}
- */
-interface IdentifierNode extends acorn.Node {
-  name: string;
-}
-
-/**
- * Definition of member expression node.
- *
- * @interface MemberExpression
- * @extends {acorn.Node}
- */
-interface MemberExpression extends acorn.Node {
-  object: IdentifierNode;
-  property: IdentifierNode;
-}
-
-/**
  * Parsed member expression
  *
  * @interface ParsedMerberExpression

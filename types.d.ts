@@ -41,3 +41,36 @@ interface NodeLocation {
   row: number;
   col: number;
 }
+
+/**
+ * Definition of identifier node.
+ *
+ * @interface IdentifierNode
+ * @extends {acorn.Node}
+ */
+interface Identifier extends acorn.Node {
+  name: "Identifier";
+}
+
+/**
+ * Definition of member expression node.
+ *
+ * @interface MemberExpression
+ * @extends {acorn.Node}
+ */
+interface MemberExpression extends acorn.Node {
+  name: "MemberExpression";
+  object: Identifier;
+  property: Identifier;
+}
+
+/**
+ * Definition of call expression node.
+ *
+ * @interface CallExpression
+ * @extends {acorn.Node}
+ */
+interface CallExpression extends acorn.Node {
+  name: "CallExpression"
+}
+
