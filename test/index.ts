@@ -5,6 +5,7 @@ import _ from "lodash/fp";
 
 import arrayRule from "../rules/Array.json";
 import symbolRule from "../rules/Symbol.json";
+import { esCheck } from '../src/index';
 
 /**
  * 读取文件
@@ -66,9 +67,16 @@ function combineCheckList(checkRuleArray: any[]) {
  */
 async function main() {
   const checkList = combineCheckList([arrayRule, symbolRule]);
-  const jscode = await readFile("../template/example.js");
-  // const jscode = `dsjklg =sdhjwl function t2`;
-  const errs = checkErrors(jscode, checkList);
+  // const jscode = await readFile("../template/example.js");
+  const jscode = `gdsgsd[Symbol.iterator]`;
+  // const errs = checkErrors(jscode, checkList);
+  const customCheckRule = {
+    memberExpression: [{
+      object: "Object",
+      property: "assign"
+    }]
+  };
+  const errs = esCheck(jscode, customCheckRule)
   const print = printError(errs);
   console.log(print)
   debugger;

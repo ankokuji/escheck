@@ -35,6 +35,8 @@ interface NodeError {
    * @memberof NodeError
    */
   errorWord: string;
+
+  errorType: string;
 }
 
 interface NodeLocation {

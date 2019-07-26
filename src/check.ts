@@ -7,6 +7,14 @@ import _ from "lodash/fp";
 import { isIdentifier, isCallExpression, isMemberExpression } from "./nameType";
 import chalk from "chalk";
 
+// A global variable to store error type.
+let errorType: ErrorType;
+
+enum ErrorType {
+  PropertyOfExpression = "PropertyOfExpression",
+  CalleeOfExpression = "CalleeOfExpression"
+}
+
 /**
  * Illustrate start and end of a node.
  *
@@ -32,7 +40,7 @@ interface Range {
 type CheckList = any;
 
 /**
- * 
+ *
  *
  * @interface ASTNodeInfo
  */
@@ -51,6 +59,8 @@ interface ASTNodeInfo {
    * @memberof ASTNodeInfo
    */
   ancesters: acorn.Node[];
+
+  errorType: ErrorType
 }
 
 /**
@@ -69,15 +79,14 @@ interface ParsedMemberExpression {
  * @param {string} code
  * @returns {ASTNodeInfo[]}
  */
-export function checkErrors(
-  code: string,
-  checkList: CheckList
-): NodeError[] {
+export function checkErrors(code: string, checkList: CheckList): NodeError[] {
   if (!checkList || !_.isObject(checkList)) {
-    throw new Error("[es-api-check] parameter `checklist` should be an object.");
+    throw new Error(
+      "[es-api-check] parameter `checklist` should be an object."
+    );
   }
   if (!code || !_.isString(code)) {
-    throw new Error("[es-api-check] parameter `code` should be a string.")
+    throw new Error("[es-api-check] parameter `code` should be a string.");
   }
   const errorList: ASTNodeInfo[] = generateNodeErrorList(code, checkList);
   return _.map(_.curryRight(parseASTNodeInfo2Error)(code))(errorList);
@@ -129,7 +138,7 @@ function parseASTNodeInfo2Error(
   nodeInfo: ASTNodeInfo,
   code: string
 ): NodeError {
-  const { node, ancesters } = nodeInfo;
+  const { node, ancesters, errorType } = nodeInfo;
 
   // const fragment = parseErrorFragment(ancesters, code);
   const fragment = parseErrorFragmentByLine(node, code);
@@ -140,7 +149,8 @@ function parseASTNodeInfo2Error(
     fragmentLocation: fragment.location,
     errorSentence: fragment.code,
     errorWord,
-    nodeLocation
+    nodeLocation,
+    errorType
   };
 }
 
@@ -277,13 +287,15 @@ function extractErrorMemberExpression(
   checkList: CheckList
 ): ASTNodeInfo | undefined {
   if (
-    isMemberExpressionNodeInFiltList(node, checkList) &&
-    isTargetExpressionBeExec(ancesters)
+    isMemberExpressionNodeInFilterList(node, checkList) &&
+    isTargetExpressionBeExec(node, ancesters)
   ) {
-    return { node: node, ancesters: ancesters };
+    return { node: node, ancesters: ancesters, errorType: errorType };
   }
   return undefined;
 }
+
+function isTargetExpressionBeExcuted() {}
 
 /**
  * determine if an expression is invoked,
@@ -293,25 +305,42 @@ function extractErrorMemberExpression(
  * @param {acorn.Node[]} ancesters
  * @returns {boolean}
  */
-function isTargetExpressionBeExec(ancesters: acorn.Node[]): boolean {
-  return (
-    isNodePropertyOfExpression(ancesters) || isNodeCallExpressionLeft(ancesters)
-  );
+function isTargetExpressionBeExec(
+  node: acorn.Node,
+  ancesters: acorn.Node[]
+): boolean {
+  if (isNodePropertyOfExpression(ancesters)) {
+    errorType = ErrorType.PropertyOfExpression;
+    return true
+  }
+
+  if (isExpressionCallee(node, ancesters)) {
+    errorType = ErrorType.CalleeOfExpression;
+    return true
+  }
+  return false;
 }
 
 /**
- * 判断目标node是否是处于调用表达式左值.
+ * Determines if the target expression is the callee of the calling expression.
  *
  * @param {acorn.Node[]} ancesters
  * @returns {boolean}
  */
-function isNodeCallExpressionLeft(ancesters: acorn.Node[]): boolean {
+function isExpressionCallee(
+  node: acorn.Node,
+  ancesters: acorn.Node[]
+): boolean {
   const ANCESTER_LOCATION = -2;
-  const ancester = _.nth(ANCESTER_LOCATION)(ancesters);
-  if (!ancester) {
+  const callExpressionAncester = _.nth(ANCESTER_LOCATION)(ancesters);
+  if (!callExpressionAncester) {
     return false;
   }
-  return isCallExpression(ancester);
+  //
+  return (
+    isCallExpression(callExpressionAncester) &&
+    isIdenticalNode(node, (callExpressionAncester as any).callee)
+  );
 }
 
 /**
@@ -335,13 +364,17 @@ function isNodePropertyOfExpression(ancesters: acorn.Node[]): boolean {
  * @param {MemberExpression} node
  * @returns {boolean}
  */
-function isMemberExpressionNodeInFiltList(
+function isMemberExpressionNodeInFilterList(
   node: MemberExpression,
   filtList: CheckList
 ): boolean {
   const parsed = parseMermberExpression(node);
   const filteredList = (_.find as any)(parsed)(filtList.memberExpression);
   return !!filteredList;
+}
+
+function isIdenticalNode(node1: acorn.Node, node2: acorn.Node) {
+  return node1.start === node2.start && node1.end === node2.end;
 }
 
 /**
@@ -364,7 +397,7 @@ function parseMermberExpression(
  * Print error list to string.
  *
  * @param {NodeError[]} errList
- * @returns {string} 
+ * @returns {string}
  */
 export function printError(errList: NodeError[]): string {
   function print(str: string) {
@@ -375,7 +408,7 @@ export function printError(errList: NodeError[]): string {
    * Generate error detail string from structured error data.
    *
    * @param {NodeError} error
-   * @returns {string} 
+   * @returns {string}
    */
   function formatLogString(error: NodeError): string {
     const { nodeLocation, errorWord, errorSentence, fragmentLocation } = error;

@@ -2,6 +2,5 @@
   "memberExpression": [{
     "object": "Symbol",
     "property": "iterator"
-  }],
-  "ds": 1
+  }]
 }

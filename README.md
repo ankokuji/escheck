@@ -15,10 +15,10 @@ import {esCheck, printError} from "es-api-check";
 
 const code = `a[Symbol.iterator]`;
 const customCheck = {
-  memberExpression: {
+  memberExpression: [{
     object: "Array",
     property: "from"
-  }
+  }]
 };
 const errors = esCheck(code, customCheck);
 // -> erros: {}
